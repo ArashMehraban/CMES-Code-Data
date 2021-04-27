@@ -317,46 +317,46 @@ if __name__ == "__main__":
     #number of repeats per simulation
     repeat = 3
 
-##                                              #Compressible Tube 
-##    #---------------------------------------------------------------------------------------------------
-##    folder_name = 'log_files_tube_comp'
-##    #indecies to keep from filename
-##    #idx:    0   1    2  3  4  5  6  7  8 
-##    #     Tube8_20int_1_deg_3_cpu_1_run_1.log
-##    keep_idx = [2,4,8]  
-##    logfile_keywords = ['Global nodes', 'Total KSP Iterations', 'SNES Solve Time', 'DoFs/Sec in SNES', \
-##                        'Strain Energy', '.edu with','Time (sec):','script']
-##                                        #line containing .edu with has number of processors
-##    full_disp = True
-##    df = process_log_files_linE_tube(folder_name, filename_ext, keep_idx, logfile_keywords,repeat,full_disp)
-####  print(df)
-####  draw_paper_data(df)
-##    nu = 0.3
-##    ylim = [0.00001, 0.1]
-##    plot_cost_err_seaborn(df, 'error-cost-tube-comp.png',nu,ylim)
-##    plot_time_err_seaborn(df, 'error-time-tube-comp.png',nu,ylim)
-##    #---------------------------------------------------------------------------------------------------
-##    
-##
-##                                            #Incompressible Tube
-##    #---------------------------------------------------------------------------------------------------
-##    folder_name = 'log_files_tube_incomp'
-##    #indecies to keep from filename
-##    #idx:    0   1    2  3  4  5   6    7     8  9
-##    #     Tube8_20int_1_deg_3_cpu_384_incomp_run_2.log
-##    logfile_keywords = ['Global nodes','Total KSP Iterations', 'SNES Solve Time', \
-##                        'DoFs/Sec in SNES', 'Strain Energy', './elasticity', 'Time (sec):', 'script']
-##    keep_idx = [2,4,9]
-##    full_disp = True
-##    df = process_log_files_linE_tube(folder_name, filename_ext, keep_idx, logfile_keywords,repeat,full_disp)
-##    #print(df)
-##    nu = 0.499999
-##    ylim = [.6, 1]
-##    plot_cost_err_seaborn(df, 'error-cost-tube-incomp.png',nu,ylim)
-##    plot_time_err_seaborn(df, 'error-time-tube-incomp.png',nu,ylim)
-##    
-##    #df.to_csv (r'compressible.csv', index = False, header=True)
-##    #---------------------------------------------------------------------------------------------------
+                                              #Compressible Tube 
+    #---------------------------------------------------------------------------------------------------
+    folder_name = 'log_files_tube_comp'
+    #indecies to keep from filename
+    #idx:    0   1    2  3  4  5  6  7  8 
+    #     Tube8_20int_1_deg_3_cpu_1_run_1.log
+    keep_idx = [2,4,8]  
+    logfile_keywords = ['Global nodes', 'Total KSP Iterations', 'SNES Solve Time', 'DoFs/Sec in SNES', \
+                        'Strain Energy', '.edu with','Time (sec):','script']
+                                        #line containing .edu with has number of processors
+    full_disp = True
+    df = process_log_files_linE_tube(folder_name, filename_ext, keep_idx, logfile_keywords,repeat,full_disp)
+##  print(df)
+##  draw_paper_data(df)
+    nu = 0.3
+    ylim = [0.00001, 0.1]
+    plot_cost_err_seaborn(df, 'error-cost-tube-comp.png',nu,ylim)
+    plot_time_err_seaborn(df, 'error-time-tube-comp.png',nu,ylim)
+    #---------------------------------------------------------------------------------------------------
+    
+
+                                            #Incompressible Tube
+    #---------------------------------------------------------------------------------------------------
+    folder_name = 'log_files_tube_incomp'
+    #indecies to keep from filename
+    #idx:    0   1    2  3  4  5   6    7     8  9
+    #     Tube8_20int_1_deg_3_cpu_384_incomp_run_2.log
+    logfile_keywords = ['Global nodes','Total KSP Iterations', 'SNES Solve Time', \
+                        'DoFs/Sec in SNES', 'Strain Energy', './elasticity', 'Time (sec):', 'script']
+    keep_idx = [2,4,9]
+    full_disp = True
+    df = process_log_files_linE_tube(folder_name, filename_ext, keep_idx, logfile_keywords,repeat,full_disp)
+    #print(df)
+    nu = 0.499999
+    ylim = [.6, 1]
+    plot_cost_err_seaborn(df, 'error-cost-tube-incomp.png',nu,ylim)
+    plot_time_err_seaborn(df, 'error-time-tube-incomp.png',nu,ylim)
+    
+    #df.to_csv (r'compressible.csv', index = False, header=True)
+    #---------------------------------------------------------------------------------------------------
 
 
                                                    #Beam
@@ -375,6 +375,7 @@ if __name__ == "__main__":
     draw_paper_data(df) 
     #---------------------------------------------------------------------------------------------------
 
+# Beam h sizes: 0.1428    0.0714    0.0476    0.0357    0.0089
     
     
 
