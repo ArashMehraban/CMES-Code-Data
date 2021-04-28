@@ -4,8 +4,7 @@ import pandas as pd
 import numpy as np
 ##from collections import OrderedDict
 import matplotlib.pyplot as plt
-##from mpl_toolkits.mplot3d import Axes3D
-##from matplotlib.lines import Line2D
+
 import seaborn
 
 class AppCtx:
@@ -163,10 +162,42 @@ def plot_time_err_seaborn(df, filename=None, nu= None, Ylim=None):
 ##             time[i][j] = np.round(df.where((ps[i] & algs[j]))['Solve Time(s)'].dropna(), decimals = 2)
 ##    print(time)
 
+
+def draw_paper_data_tube(df,deg):
+    mdf = df.drop(['#CG','MDoFs/Sec','Petsc Time(s)', 'Solve Time(s)','Total Time(s)','np'], axis=1)
+    tmp = mdf.groupby(['deg','#Refine'],as_index = False).first()
+    tmp_p = tmp.copy()
+    tmp_p['L2 Error'] = tmp_p['L2 Error'].apply(lambda x: '%.3e' % x)
+    print(tmp_p.to_latex())
+    hd = [[0.7411 ,   0.4941  ,  0.3705  ,  0.2964],\
+          [0.7411 ,   0.4941   , 0.3705  ,  0.2964],\
+          [2.9620  ,  1.9756  ,  1.4819 ,   1.1856  ,  0.9880], \
+          [2.9620  ,  1.9756   , 1.4819 ,   1.1856]]
+
+    tmp = tmp[:-1] 
+    if(deg == 4):
+        err1 = tmp.where(tmp['deg']==1)['L2 Error'].dropna()
+    err2 = tmp.where(tmp['deg']==2)['L2 Error'].dropna()
+    err3 = tmp.where(tmp['deg']==3)['L2 Error'].dropna()
+    err4 = tmp.where(tmp['deg']==4)['L2 Error'].dropna()
+
+    if(deg == 4):
+        err = [err1,err2,err3,err4]
+    else:
+        err = [err2,err3,err4]
+        hd = hd[1:]
+
+    convergence_rate = []   
+    for i in range(len(hd)):
+        s,bb = lin_reg_fit(np.log10(hd[i]), np.log10(err[i]))
+        convergence_rate.append(round(s, 2))
+    print(convergence_rate)
+   
+
 def sort_by(df, sortby):
     return df.sort_values([sortby], ascending = (True))
 
-def draw_paper_data(df):
+def draw_paper_data_beam(df):
     mdf = df.drop(['#CG','MDoFs/Sec','Petsc Time(s)', 'Solve Time(s)','Total Time(s)','np'], axis=1)
     #mdf['Solve Time(s)'] = np.round(mdf['Solve Time(s)'], decimals=2)
     mdf['Strain Energy'] = mdf['Strain Energy'].apply(lambda x: '%.6e' % x)
@@ -199,7 +230,6 @@ def process_log_files_linE_beam(folder_name, filename_ext, keep_idx, logfile_key
     repeat = 3
     #create a dataframe
     df = create_df(filenames_data, files_data, df_col_names, df_order, df_sort_by, df_sort_by_tuple_asc, df_drop, repeat, full_disp)
-
     return df
 
 def process_log_files_linE_tube(folder_name, filename_ext, keep_idx, logfile_keywords,repeat,full_disp):
@@ -227,7 +257,6 @@ def process_log_files_linE_tube(folder_name, filename_ext, keep_idx, logfile_key
     repeat = 3
     #create a dataframe
     df = create_df(filenames_data, files_data, df_col_names, df_order, df_sort_by, df_sort_by_tuple_asc, df_drop, repeat, full_disp)
-
     return df
 
 
@@ -308,6 +337,34 @@ def digitize(item):
         return int(item)
     else:
         return
+
+def lin_reg_fit(x,y):
+
+    if x.shape != y.shape:
+        print('input size mismatch')
+    else:
+        n = x.size
+    xy = x * y
+    x_sq = x**2
+    sum_x = np.sum(x)
+    sum_y = np.sum(y)
+    sum_xy = np.sum(x*y)
+    sum_x_sq = np.sum(x_sq)
+    #slope
+    m = (n * sum_xy - sum_x * sum_y) /(n * sum_x_sq - sum_x**2)
+    #b
+    b = (sum_y - m * sum_x) / n
+    return m, b
+
+def compute_conv_slope(df,h):
+    convergence_rate = []
+    df = df[:-1]
+    for i in range(1,len(h)+1):
+        err = df.where(df['deg']==i)['L2 Error'].dropna()
+        s,bb = lin_reg_fit(np.log10(h), np.log10(err))
+        convergence_rate.append(round(s, 2))
+    return convergence_rate
+        
      
 
 if __name__ == "__main__":
@@ -329,15 +386,16 @@ if __name__ == "__main__":
                                         #line containing .edu with has number of processors
     full_disp = True
     df = process_log_files_linE_tube(folder_name, filename_ext, keep_idx, logfile_keywords,repeat,full_disp)
-##  print(df)
+    print(df)
 ##  draw_paper_data(df)
     nu = 0.3
     ylim = [0.00001, 0.1]
-    plot_cost_err_seaborn(df, 'error-cost-tube-comp.png',nu,ylim)
-    plot_time_err_seaborn(df, 'error-time-tube-comp.png',nu,ylim)
+##    plot_cost_err_seaborn(df, 'error-cost-tube-comp.png',nu,ylim)
+##    plot_time_err_seaborn(df, 'error-time-tube-comp.png',nu,ylim)
+    draw_paper_data_tube(df,4)
     #---------------------------------------------------------------------------------------------------
-    
-
+##    
+##
                                             #Incompressible Tube
     #---------------------------------------------------------------------------------------------------
     folder_name = 'log_files_tube_incomp'
@@ -352,27 +410,32 @@ if __name__ == "__main__":
     #print(df)
     nu = 0.499999
     ylim = [.6, 1]
-    plot_cost_err_seaborn(df, 'error-cost-tube-incomp.png',nu,ylim)
-    plot_time_err_seaborn(df, 'error-time-tube-incomp.png',nu,ylim)
-    
+    #plot_cost_err_seaborn(df, 'error-cost-tube-incomp.png',nu,ylim)
+    #plot_time_err_seaborn(df, 'error-time-tube-incomp.png',nu,ylim)
+    draw_paper_data_tube(df,3)
     #df.to_csv (r'compressible.csv', index = False, header=True)
     #---------------------------------------------------------------------------------------------------
 
 
-                                                   #Beam
-    #---------------------------------------------------------------------------------------------------
-    folder_name = 'log_files_beam'
-    filename_ext = '.log'
-    #idx: 0   1   2  3  4  5  6   7  8 
-    #     23_Beam_3_deg_2_cpu_64_run_3.log
-    keep_idx = [2,4,6,8]
-
-    logfile_keywords = ['Global nodes','Total KSP Iterations', 'SNES Solve Time', \
-                        'DoFs/Sec in SNES', 'Strain Energy', 'Time (sec):', 'script']
-    full_disp = True
-    df = process_log_files_linE_beam(folder_name, filename_ext, keep_idx, logfile_keywords,repeat,full_disp)
-    print(df)
-    draw_paper_data(df) 
+##                                                   #Beam
+##    #---------------------------------------------------------------------------------------------------
+##    folder_name = 'log_files_beam'
+##    filename_ext = '.log'
+##    #idx: 0   1   2  3  4  5  6   7  8 
+##    #     23_Beam_3_deg_2_cpu_64_run_3.log
+##    keep_idx = [2,4,6,8]
+##
+##    logfile_keywords = ['Global nodes','Total KSP Iterations', 'SNES Solve Time', \
+##                        'DoFs/Sec in SNES', 'Strain Energy', 'Time (sec):', 'script']
+##    full_disp = True
+##    df = process_log_files_linE_beam(folder_name, filename_ext, keep_idx, logfile_keywords,repeat,full_disp)
+##    print(df)
+##    draw_paper_data_beam(df)
+##    h = [0.1428, 0.0714, 0.0476, 0.0357]
+##    print("slopes for beam with poly order 1-4 ")
+##    cs = compute_conv_slope(df,h)
+##    print(cs)
+    
     #---------------------------------------------------------------------------------------------------
 
 # Beam h sizes: 0.1428    0.0714    0.0476    0.0357    0.0089
